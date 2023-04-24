@@ -4,52 +4,55 @@ using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using Unity.Netcode.Transports.UTP;
 
 public class NetworkManagerUI : MonoBehaviour
 {
-    // we use SerializeField to create private variables visible in the inspector
-    [SerializeField]
-    private Button serverBtn;
+   // we use SerializeField to create private variables visible in the inspector
+   [SerializeField] private Button serverBtn, clientBtn, hostBtn, JoinClientBtn, StartServerBtn, StartHost;
+   [SerializeField] private TMP_InputField iPInputField, portInputField;
 
-    [SerializeField]
-    private Button clientBtn;
+   private void Awake()
+   {
+      // we add listeners to the buttons
+      serverBtn.onClick.AddListener(() =>
+      {
+         // Singleton design pattern
+         NetworkManager.Singleton.StartServer();
+      });
 
-    [SerializeField]
-    private Button hostBtn;
+      clientBtn.onClick.AddListener(() =>
+      {
+         NetworkManager.Singleton.StartClient();
+      });
 
-    // TMP input field
-    [SerializeField]
-    private TMP_InputField iPInputField;
+      hostBtn.onClick.AddListener(() =>
+      {
+         NetworkManager.Singleton.StartHost();
+      });
 
-    [SerializeField]
-    private TMP_InputField portInputField;
+      StartServerBtn.onClick.AddListener(() =>
+      {
+         SetTransportData();
+         NetworkManager.Singleton.StartServer();
+      });
 
-    [SerializeField]
-    private Button JoinBtn;
-
-    private void Awake()
-    {
-        // we add listeners to the buttons
-        serverBtn.onClick.AddListener(() =>
+      JoinClientBtn.onClick.AddListener(() =>
         {
-            // Singleton design pattern
-            NetworkManager.Singleton.StartServer();
-        });
-        clientBtn.onClick.AddListener(() =>
-        {
-            NetworkManager.Singleton.StartClient();
-        });
-        hostBtn.onClick.AddListener(() =>
-        {
-            NetworkManager.Singleton.StartHost();
+           SetTransportData();
+           NetworkManager.Singleton.StartClient();
         });
 
-        JoinBtn.onClick.AddListener(() =>
+      StartHost.onClick.AddListener(() =>
         {
-            string ip = iPInputField.text;
-            string port = portInputField.text;
-            Debug.Log($"Joining IP: {ip}, Port: {port}");
-            // NetworkManager.Singleton.ConnectedHostname.
+           SetTransportData();
+           NetworkManager.Singleton.StartHost();
         });
-    }
+   }
+
+   private void SetTransportData()
+   {
+      NetworkManager.Singleton.GetComponent<UnityTransport>().ConnectionData.Address = iPInputField.text;
+      NetworkManager.Singleton.GetComponent<UnityTransport>().ConnectionData.Port = ushort.Parse(portInputField.text);
+   }
 }
